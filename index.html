@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" data-page-lang="en" data-asset-prefix="" data-alt-lang-href="ja/">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MineCompass - Minesweeper Solver</title>
+  <link rel="canonical" href="https://yukio0.github.io/mine-compass/" />
+  <link rel="alternate" hreflang="en" href="https://yukio0.github.io/mine-compass/" />
+  <link rel="alternate" hreflang="ja" href="https://yukio0.github.io/mine-compass/ja/" />
+  <link rel="alternate" hreflang="x-default" href="https://yukio0.github.io/mine-compass/" />
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="icons/site.webmanifest">
+  <meta name="theme-color" content="#e9eef6">
+  <meta name="apple-mobile-web-app-title" content="MineCompass">
+  <meta name="application-name" content="MineCompass">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <meta id="metaDescription" name="description"
+    content="A Minesweeper solver for entering a board position and checking guaranteed safe cells, guaranteed mines, and mine probabilities."
+    data-i18n-content="metaDescription">
+</head>
+
+<body>
+  <header>
+    <div class="titleRow">
+      <h1>MineCompass - Minesweeper Solver</h1>
+      <a class="langToggle" id="langToggle" href="ja/" lang="ja" hreflang="ja">JA</a>
+      <button class="themeToggle" id="themeToggle" type="button" aria-pressed="false" data-i18n="themeDark">
+        🌙 Switch to dark mode
+      </button>
+      <a class="githubLink" href="https://github.com/yukio0/mine-compass" target="_blank" rel="noopener noreferrer"
+        data-i18n="githubLinkLabel">GitHub</a>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="aboutRow">
+      <div class="aboutWrap">
+        <button class="aboutTrigger" type="button" aria-describedby="aboutTip" data-i18n="aboutButton">About
+          MineCompass</button>
+        <div class="aboutTip" id="aboutTip" role="tooltip" aria-hidden="true">
+          <div class="aboutTipBody">
+            <div data-i18n="aboutLine1">MineCompass helps you analyze classic Minesweeper positions. Enter a board
+              position to see the analysis.</div>
+            <div data-i18n="aboutLine2">For the best experience, use a desktop browser.</div>
+            <div data-i18n="aboutLine3">Enter covered cells, flags, and revealed numbers to highlight guaranteed safe
+              cells, guaranteed mines, and the best candidate cells with the lowest mine probability.</div>
+            <div><span data-i18n="aboutRepoLead">Bug reports and feedback are welcome on </span><a
+                href="https://github.com/yukio0/mine-compass/issues" target="_blank"
+                rel="noopener noreferrer">GitHub</a><span data-i18n="aboutRepoTail">.</span></div>
+            <div data-i18n="aboutLine4">Use the results as a helpful reference while solving.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="row">
+        <label for="rowsInput" data-i18n="mapSize">Board size</label>
+        <div class="sizeFields">
+          <label class="sizeField" for="colsInput">
+            <span data-i18n="width">Width</span>
+            <input id="colsInput" type="number" min="1" max="100" value="9" inputmode="numeric" />
+          </label>
+          <label class="sizeField" for="rowsInput">
+            <span data-i18n="height">Height</span>
+            <input id="rowsInput" type="number" min="1" max="100" value="9" inputmode="numeric" />
+          </label>
+          <label class="sizeField" for="mineCountInput">
+            <span data-i18n="mineCount">Total mines</span>
+            <input id="mineCountInput" type="number" min="0" max="10000" value="10" inputmode="numeric" />
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <label for="inputMode" data-i18n="inputMode">Input mode</label>
+        <select id="inputMode">
+          <option value="paint" selected data-i18n="inputModePaint">Paint (select a tool and drag)</option>
+          <option value="cycle" data-i18n="inputModeCycle">Cycle (click to cycle through states)</option>
+        </select>
+      </div>
+
+      <div class="info" id="stageInfo"></div>
+
+      <div class="toolbox">
+        <div class="toolboxHead">
+          <div class="toolMeta" id="toolMeta">
+            <span class="currentToolPill" id="currentToolPill" data-i18n="currentToolPrefix">Current tool:</span>
+          </div>
+        </div>
+
+        <div class="toolboxControls" id="toolboxControls">
+          <div class="toolGrid" id="toolGrid"></div>
+          <div class="btns historyBtns" id="historyBtns">
+            <button id="btnUndo" type="button" data-i18n="undoLong">Undo (Ctrl+Z)</button>
+            <button id="btnRedo" type="button" data-i18n="redoLong">Redo (Ctrl+Y)</button>
+          </div>
+        </div>
+        <div class="info opsInfo" id="opsInfo"></div>
+      </div>
+
+      <div class="btns">
+        <button id="btnReset" data-i18n="resetBoard">Reset board</button>
+      </div>
+    </section>
+
+    <section class="boardWrap">
+      <div class="legend">
+        <span class="pill"><span class="dot dot-wall"></span><span data-i18n="legendCovered">Covered</span></span>
+        <span class="pill"><span class="dot dot-flag"></span><span data-i18n="legendFlag">Flag</span></span>
+        <span class="pill"><span class="dot dot-revealed"></span><span data-i18n="legendRevealed">Revealed (number or
+            empty)</span></span>
+        <span class="pill"><span class="dot dot-safe"></span><span data-i18n="legendSafe">Guaranteed safe</span></span>
+        <span class="pill"><span class="dot dot-mine"></span><span data-i18n="legendMine">Guaranteed mine</span></span>
+        <span class="pill"><span class="dot dot-reco"></span><span data-i18n="legendReco">Recommended (lowest mine
+            probability)</span></span>
+      </div>
+
+      <div class="boardScroller" id="boardScroller" aria-label="Scrollable board"
+        data-i18n-aria-label="boardScrollerAria">
+        <div class="boardFrame" id="boardFrame">
+          <div class="axisY" id="axisY" aria-label="Y-axis" data-i18n-aria-label="yAxisAria"></div>
+          <div class="board" id="board" aria-label="Board" data-i18n-aria-label="boardAria"></div>
+          <div class="axisCorner" aria-hidden="true"></div>
+          <div class="axisX" id="axisX" aria-label="X-axis" data-i18n-aria-label="xAxisAria"></div>
+        </div>
+      </div>
+
+      <div class="mobilePaintControls" id="mobilePaintControls"></div>
+
+      <div class="boardSolveRow">
+        <button class="primary" id="btnSolve" data-i18n="analyze">Analyze</button>
+        <label class="autoSolve" title="When enabled, the board updates automatically after clicks and drag actions."
+          data-i18n-title="autoAnalyzeTitle">
+          <input type="checkbox" id="autoSolve" checked />
+          <span data-i18n="autoAnalyze">Auto-analyze</span>
+        </label>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div class="probTip" id="probTip" role="tooltip" aria-hidden="true"></div>
+  <script src="js/minecompass-i18n.js" defer></script>
+  <script src="js/minecompass-constants.js" defer></script>
+  <script src="js/minecompass-utils.js" defer></script>
+  <script src="js/minecompass-solver.js" defer></script>
+  <script src="js/minecompass-view.js" defer></script>
+  <script src="js/minecompass-logic.js" defer></script>
+  <script src="js/minecompass-input.js" defer></script>
+  <script src="js/minecompass-app.js" defer></script>
+</body>
+
+</html>

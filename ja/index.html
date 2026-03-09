@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja" data-page-lang="ja" data-asset-prefix="../" data-alt-lang-href="../">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MineCompass - マインスイーパーソルバー</title>
+  <link rel="canonical" href="https://yukio0.github.io/mine-compass/ja/" />
+  <link rel="alternate" hreflang="en" href="https://yukio0.github.io/mine-compass/" />
+  <link rel="alternate" hreflang="ja" href="https://yukio0.github.io/mine-compass/ja/" />
+  <link rel="alternate" hreflang="x-default" href="https://yukio0.github.io/mine-compass/" />
+  <link rel="icon" href="../icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="../icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="../icons/favicon-16x16.png" sizes="16x16">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+  <link rel="manifest" href="../icons/site-ja.webmanifest">
+  <meta name="theme-color" content="#e9eef6">
+  <meta name="apple-mobile-web-app-title" content="MineCompass">
+  <meta name="application-name" content="MineCompass">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <meta id="metaDescription" name="description" content="盤面を入力して、安全確定・地雷確定・地雷確率を確認できるマインスイーパー用ソルバーです。"
+    data-i18n-content="metaDescription">
+</head>
+
+<body>
+  <header>
+    <div class="titleRow">
+      <h1>MineCompass - マインスイーパーソルバー</h1>
+      <a class="langToggle" id="langToggle" href="../" lang="en" hreflang="en">EN</a>
+      <button class="themeToggle" id="themeToggle" type="button" aria-pressed="false" data-i18n="themeDark">
+        🌙 ダークモードに変更
+      </button>
+      <a class="githubLink" href="https://github.com/yukio0/mine-compass" target="_blank" rel="noopener noreferrer"
+        data-i18n="githubLinkLabel">GitHub</a>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="aboutRow">
+      <div class="aboutWrap">
+        <button class="aboutTrigger" type="button" aria-describedby="aboutTip"
+          data-i18n="aboutButton">このツールについて</button>
+        <div class="aboutTip" id="aboutTip" role="tooltip" aria-hidden="true">
+          <div class="aboutTipBody">
+            <div data-i18n="aboutLine1">このツールでは、マインスイーパーの盤面を入力して、推論結果を確認できます。</div>
+            <div data-i18n="aboutLine2">操作性の都合上、PCでの使用をおすすめします。</div>
+            <div data-i18n="aboutLine3">未開封マス・旗・数字を入力すると、安全確定・地雷確定・おすすめ候補（地雷可能性最低）を表示します。</div>
+            <div><span data-i18n="aboutRepoLead">バグ報告は </span><a href="https://github.com/yukio0/mine-compass/issues"
+                target="_blank" rel="noopener noreferrer">GitHub</a><span data-i18n="aboutRepoTail"> でお願いします。</span>
+            </div>
+            <div data-i18n="aboutLine4">結果はあくまで考える際の参考情報としてご利用ください。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="row">
+        <label for="rowsInput" data-i18n="mapSize">マップサイズ</label>
+        <div class="sizeFields">
+          <label class="sizeField" for="colsInput">
+            <span data-i18n="width">横</span>
+            <input id="colsInput" type="number" min="1" max="100" value="9" inputmode="numeric" />
+          </label>
+          <label class="sizeField" for="rowsInput">
+            <span data-i18n="height">縦</span>
+            <input id="rowsInput" type="number" min="1" max="100" value="9" inputmode="numeric" />
+          </label>
+          <label class="sizeField" for="mineCountInput">
+            <span data-i18n="mineCount">地雷数</span>
+            <input id="mineCountInput" type="number" min="0" max="10000" value="10" inputmode="numeric" />
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <label for="inputMode" data-i18n="inputMode">入力モード</label>
+        <select id="inputMode">
+          <option value="paint" selected data-i18n="inputModePaint">ペイント（ツール＋ドラッグ）</option>
+          <option value="cycle" data-i18n="inputModeCycle">サイクル（クリックで未開封→⚑→無地(0)→…）</option>
+        </select>
+      </div>
+
+      <div class="info" id="stageInfo"></div>
+
+      <div class="toolbox">
+        <div class="toolboxHead">
+          <div class="toolMeta" id="toolMeta">
+            <span class="currentToolPill" id="currentToolPill" data-i18n="currentToolPrefix">現在：</span>
+          </div>
+        </div>
+
+        <div class="toolboxControls" id="toolboxControls">
+          <div class="toolGrid" id="toolGrid"></div>
+          <div class="btns historyBtns" id="historyBtns">
+            <button id="btnUndo" type="button" data-i18n="undoLong">元に戻す（Ctrl+Z）</button>
+            <button id="btnRedo" type="button" data-i18n="redoLong">やり直し（Ctrl+Y）</button>
+          </div>
+        </div>
+        <div class="info opsInfo" id="opsInfo"></div>
+      </div>
+
+      <div class="btns">
+        <button id="btnReset" data-i18n="resetBoard">盤面リセット</button>
+      </div>
+    </section>
+
+    <section class="boardWrap">
+      <div class="legend">
+        <span class="pill"><span class="dot dot-wall"></span><span data-i18n="legendCovered">未開封</span></span>
+        <span class="pill"><span class="dot dot-flag"></span><span data-i18n="legendFlag">旗（地雷）</span></span>
+        <span class="pill"><span class="dot dot-revealed"></span><span
+            data-i18n="legendRevealed">開示済み（数字/無地）</span></span>
+        <span class="pill"><span class="dot dot-safe"></span><span data-i18n="legendSafe">安全確定</span></span>
+        <span class="pill"><span class="dot dot-mine"></span><span data-i18n="legendMine">地雷確定</span></span>
+        <span class="pill"><span class="dot dot-reco"></span><span data-i18n="legendReco">おすすめ（地雷可能性最低）</span></span>
+      </div>
+
+      <div class="boardScroller" id="boardScroller" aria-label="盤面スクローラー" data-i18n-aria-label="boardScrollerAria">
+        <div class="boardFrame" id="boardFrame">
+          <div class="axisY" id="axisY" aria-label="Y軸" data-i18n-aria-label="yAxisAria"></div>
+          <div class="board" id="board" aria-label="盤面" data-i18n-aria-label="boardAria"></div>
+          <div class="axisCorner" aria-hidden="true"></div>
+          <div class="axisX" id="axisX" aria-label="X軸" data-i18n-aria-label="xAxisAria"></div>
+        </div>
+      </div>
+
+      <div class="mobilePaintControls" id="mobilePaintControls"></div>
+
+      <div class="boardSolveRow">
+        <button class="primary" id="btnSolve" data-i18n="analyze">推論</button>
+        <label class="autoSolve" title="ON: クリック時 or ドラッグ終了時に自動で推論します" data-i18n-title="autoAnalyzeTitle">
+          <input type="checkbox" id="autoSolve" checked />
+          <span data-i18n="autoAnalyze">自動推論</span>
+        </label>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div class="probTip" id="probTip" role="tooltip" aria-hidden="true"></div>
+  <script src="../js/minecompass-i18n.js" defer></script>
+  <script src="../js/minecompass-constants.js" defer></script>
+  <script src="../js/minecompass-utils.js" defer></script>
+  <script src="../js/minecompass-solver.js" defer></script>
+  <script src="../js/minecompass-view.js" defer></script>
+  <script src="../js/minecompass-logic.js" defer></script>
+  <script src="../js/minecompass-input.js" defer></script>
+  <script src="../js/minecompass-app.js" defer></script>
+</body>
+
+</html>

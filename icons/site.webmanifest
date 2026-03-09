@@ -1,0 +1,38 @@
+{
+  "id": "https://yukio0.github.io/mine-compass/",
+  "lang": "en",
+  "name": "MineCompass",
+  "short_name": "MineCompass",
+  "description": "MineCompass - Minesweeper solver and assistant",
+  "start_url": "https://yukio0.github.io/mine-compass/",
+  "scope": "https://yukio0.github.io/mine-compass/",
+  "display": "standalone",
+  "background_color": "#e9eef6",
+  "theme_color": "#e9eef6",
+  "icons": [
+    {
+      "src": "./android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
